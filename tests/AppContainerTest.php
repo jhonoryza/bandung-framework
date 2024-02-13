@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use Fajar\Bandung\Container\AppContainer;
+use Fajar\Bandung\Container\Container;
 use PHPUnit\Framework\TestCase;
 
 class AppContainerTest extends TestCase
@@ -11,7 +11,7 @@ class AppContainerTest extends TestCase
     /** @test */
     public function container_is_worked()
     {
-        $container = new AppContainer();
+        $container = new Container();
 
         $container->register(ContainerA::class, fn() => new ContainerA(new ContainerB()));
 
@@ -21,7 +21,7 @@ class AppContainerTest extends TestCase
     /** @test */
     public function container_can_auto_resolved()
     {
-        $container = new AppContainer();
+        $container = new Container();
 
         $a = $container->get(ContainerA::class);
 
@@ -31,7 +31,7 @@ class AppContainerTest extends TestCase
     /** @test */
     public function container_singleton_is_worked()
     {
-        $container = new AppContainer();
+        $container = new Container();
 
         $container->singleton(Singleton::class, fn () => new Singleton());
 

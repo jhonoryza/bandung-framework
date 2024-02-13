@@ -2,10 +2,10 @@
 
 namespace Fajar\Bandung\Container;
 
-use Fajar\Bandung\Interface\Container;
+use Fajar\Bandung\Interface\Container as ContainerInterface;
 use ReflectionClass;
 use ReflectionParameter;
-class AppContainer implements Container
+class Container implements ContainerInterface
 {
     public array $binds = [];
     public array $singletons = [];
