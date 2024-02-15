@@ -1,10 +1,20 @@
 # Bandung Framework
 
-micro php framework
+small php framework
 
-currently still wip
+## Feature
 
-## Get started
+- route
+- request
+- response
+
+## WIP
+
+- query builder
+- migration
+- queue
+
+## Usage
 
 wip
 

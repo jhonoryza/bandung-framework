@@ -5,7 +5,7 @@ namespace Tests;
 use Fajar\Bandung\Container\Container;
 use PHPUnit\Framework\TestCase;
 
-class AppContainerTest extends TestCase
+class ContainerTest extends TestCase
 {
 
     /** @test */
@@ -33,7 +33,7 @@ class AppContainerTest extends TestCase
     {
         $container = new Container();
 
-        $container->singleton(Singleton::class, fn () => new Singleton());
+        $container->singleton(Singleton::class, fn() => new Singleton());
 
         $a = $container->get(Singleton::class);
         $this->assertEquals(1, $a::$count);
@@ -45,7 +45,9 @@ class AppContainerTest extends TestCase
 
 class ContainerA
 {
-    public function __construct(public ContainerB $b){}
+    public function __construct(public ContainerB $b)
+    {
+    }
 }
 
 class ContainerB
