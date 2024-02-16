@@ -27,6 +27,21 @@ class Kernel
 {
     private string $appNamespace = 'App\\';
 
+    public function loadEnv($path): self
+    {
+        $lines = file($path . '/.env');
+        foreach ($lines as $line) {
+            [$key, $value] = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+
+            putenv(sprintf('%s=%s', $key, $value));
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
+        return $this;
+    }
+
     /**
      * this function will do the binding of all dependency
      * @throws ContainerNotFoundException
@@ -65,7 +80,12 @@ class Kernel
             ->singleton(ContainerInterface::class, fn() => $container)
             ->singleton(CommandInterface::class, fn() => new ConsoleCommand());
 
+        // register user command
         $this->discoverCommand($container, $appDir);
+
+        // override app namespace and register internal framework command
+        $this->appNamespace = 'Fajar\\Bandung\\Command\\';
+        $this->discoverCommand($container, __DIR__ . '/../Command');
 
         return $container;
     }

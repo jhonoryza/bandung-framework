@@ -11,7 +11,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
  * then we create http kernel to handle request and response
  */
 $appDir = __DIR__ . '/../app';
-$container = (new Kernel)->registerHttpDependency($appDir);
+$container = (new Kernel)
+    ->loadEnv(__DIR__ . '/../')
+    ->registerHttpDependency($appDir);
 
 $app = new HttpKernel($container);
 $app->run();

@@ -15,8 +15,8 @@ class ConsoleCommand implements CommandInterface
         return $this;
     }
 
-    public function dispatch()
+    public function getCommands(): array
     {
-
+        return $this->commands;
     }
 }

@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 use Fajar\Bandung\Kernel\CommandKernel;
@@ -12,9 +13,12 @@ require_once __DIR__ . '/vendor/autoload.php';
  */
 
 $appDir = __DIR__ . '/app';
-$container = (new Kernel())->registerCommandDependency($appDir);
+$container = (new Kernel)
+    ->loadEnv(__DIR__)
+    ->registerCommandDependency($appDir);
 
-$app = new CommandKernel($container, $_SERVER['argv']);
+//$_SERVER['argv']
+$app = new CommandKernel($container, new \Symfony\Component\Console\Input\ArgvInput);
 $app->run();
 
 exit;
