@@ -36,7 +36,24 @@ class InternalCommand
 
             $this->copyBandungFile($cwd);
 
+            $this->initializeGit($cwd);
+
             info('install success');
+        }
+    }
+
+    private function initializeGit(string $cwd): void
+    {
+        if (confirm(
+            label: sprintf("Do you want to initialize git repo? %s", $cwd),
+            default: true,
+        )) {
+            if (!is_dir($cwd . '/.git')) {
+                passthru('git init');
+                passthru('cp vendor/jhonoryza/bandung-framework/.gitignore .');
+                passthru('git add .');
+                passthru('git commit -m "initial commit"');
+            }
         }
     }
 
