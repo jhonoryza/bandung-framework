@@ -18,7 +18,6 @@ use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
-use function PHPUnit\Framework\directoryExists;
 
 /**
  * this class responsible to register all dependency
@@ -103,7 +102,7 @@ class Kernel
     private function discoverRoutes(Container $container, string $directory): void
     {
         // check if directory is exists
-        if (!directoryExists($directory)) {
+        if (!is_dir($directory)) {
             return;
         }
 
@@ -145,7 +144,7 @@ class Kernel
     private function discoverCommand(Container $container, string $directory): void
     {
         // check if directory is exists
-        if (!directoryExists($directory)) {
+        if (!is_dir($directory)) {
             return;
         }
 
