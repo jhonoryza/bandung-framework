@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use Fajar\Bandung\Attribute\Get;
 use Fajar\Bandung\Enum\HttpHeader;
+use Fajar\Bandung\Interface\RequestInterface;
 use Fajar\Bandung\Interface\ResponseInterface;
 use Fajar\Bandung\Response\JsonResponse;
 use Fajar\Bandung\Response\Response;
@@ -31,11 +32,12 @@ class HomeController
     }
 
     #[Get(uri: '/posts/{id}')]
-    public function postDetail(string $id): ResponseInterface
+    public function postDetail(RequestInterface $request, string $id): ResponseInterface
     {
         return JsonResponse::make(HttpHeader::HTTP_200, [
             'message' => 'ok',
-            'id' => $id
+            'id' => $id,
+            'request' => $request->getMethod()
         ]);
     }
 

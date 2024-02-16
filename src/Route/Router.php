@@ -4,6 +4,7 @@ namespace Fajar\Bandung\Route;
 
 
 use Fajar\Bandung\Attribute\Route;
+use Fajar\Bandung\Container\Container;
 use Fajar\Bandung\Enum\HttpHeader;
 use Fajar\Bandung\Interface\RequestInterface;
 use Fajar\Bandung\Interface\ResponseInterface;
@@ -48,10 +49,19 @@ class Router implements RouterInterface
         // matched route
         $controllerMethodName = $matchedRoute->reflectionMethod->getName();
         $controllerClassName = $matchedRoute->reflectionMethod->getDeclaringClass()->getName();
-        $controller = new $controllerClassName();
+        $controller = Container::instance()->get($controllerClassName);
 
+        // resolve missing params like something injected by dependency injection
+        foreach ($matchedRoute->reflectionMethod->getParameters() as $param) {
+            $paramName = $param->getName();
+            if (!array_key_exists($paramName, $params)) {
+                $paramType = $param->getType()->getName();
+                $params[$paramName] = Container::instance()->get($paramType);
+            }
+        }
         // call controller method
-        return $controller->{$controllerMethodName}(...$params);
+        return call_user_func_array([$controller, $controllerMethodName], $params);
+        // return $controller->{$controllerMethodName}(...$params);
     }
 
     private function resolveParams(string $uri, string $path): ?array
