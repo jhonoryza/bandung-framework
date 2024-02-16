@@ -23,7 +23,7 @@ class Kernel
     /**
      * this function will do the binding of all dependency
      */
-    public function registerProviders(): Container
+    public function registerProviders(string $appDir): Container
     {
         $container = new Container();
 
@@ -41,7 +41,7 @@ class Kernel
                 );
             });
 
-        $this->discoverRoutes($container);
+        $this->discoverRoutes($container, $appDir);
 
         return $container;
     }
@@ -51,9 +51,8 @@ class Kernel
      * checking all php class that has Route attribute
      * then register it to Router class
      */
-    public function discoverRoutes($container): void
+    public function discoverRoutes(Container $container, string $directory): void
     {
-        $directory = __DIR__ . '/../../app';
         $namespace = 'App\\';
 
         $directories = new \RecursiveDirectoryIterator($directory);

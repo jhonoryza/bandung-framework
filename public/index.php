@@ -7,11 +7,11 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 /**
  * http flow request and response
- * first we register kernel to binding all depedency
+ * first we register kernel to binding all dependency
  * then we create http kernel to handle request and response
  */
-
-$container = (new Kernel)->registerProviders();
+$appDir = __DIR__ . '/../app';
+$container = (new Kernel)->registerProviders($appDir);
 
 $app = new HttpKernel($container);
 $app->run();
