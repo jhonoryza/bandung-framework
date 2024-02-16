@@ -53,6 +53,8 @@ class InternalCommand
                 passthru('cp vendor/jhonoryza/bandung-framework/.gitignore .');
                 passthru('git add .');
                 passthru('git commit -m "initial commit"');
+
+                info('git repo initialized');
             }
         }
     }
@@ -61,12 +63,14 @@ class InternalCommand
     {
         if (!is_dir($cwd . '/app')) {
             mkdir($cwd . '/app');
+            info('app dir created');
         }
         $file = $cwd . '/composer.json';
         $data = json_decode(file_get_contents($file), true);
         $data["autoload"]["psr-4"] = array_merge(['App\\' => 'app/'], $data["autoload"]["psr-4"]);
         file_put_contents($file, json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
         passthru('composer dump-autoload');
+        info('updated composer.json');
     }
 
     private function copyEnvExampleFile(string $cwd): void
