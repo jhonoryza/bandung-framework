@@ -18,6 +18,7 @@ use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use function PHPUnit\Framework\directoryExists;
 
 /**
  * this class responsible to register all dependency
@@ -29,6 +30,9 @@ class Kernel
 
     public function loadEnv($path): self
     {
+        if (!file_exists($path . '/.env')) {
+            return $this;
+        }
         $lines = file($path . '/.env');
         foreach ($lines as $line) {
             [$key, $value] = explode('=', $line, 2);
@@ -98,6 +102,11 @@ class Kernel
      */
     private function discoverRoutes(Container $container, string $directory): void
     {
+        // check if directory is exists
+        if (!directoryExists($directory)) {
+            return;
+        }
+
         $directories = new \RecursiveDirectoryIterator($directory);
         $files = new \RecursiveIteratorIterator($directories);
         foreach ($files as $file) {
@@ -135,6 +144,11 @@ class Kernel
      */
     private function discoverCommand(Container $container, string $directory): void
     {
+        // check if directory is exists
+        if (!directoryExists($directory)) {
+            return;
+        }
+
         $directories = new \RecursiveDirectoryIterator($directory);
         $files = new \RecursiveIteratorIterator($directories);
         foreach ($files as $file) {
