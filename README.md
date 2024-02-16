@@ -29,10 +29,19 @@ small php framework
 
 ## Getting Started
 
+### create empty project
+
+```bash
+mkdir myapp
+cd myapp
+composer init
+```
+
 ### installation
 
 ```bash
 composer require jhonoryza/bandung-framework
+cp vendor/jhonoryza/bandung-framework/bandung .
 php bandung install
 ```
 

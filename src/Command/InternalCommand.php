@@ -28,6 +28,8 @@ class InternalCommand
 
             $cwd = getcwd();
 
+            $this->createAppDir($cwd);
+
             $this->copyEnvExampleFile($cwd);
 
             $this->copyPublicIndexFile($cwd);
@@ -38,22 +40,32 @@ class InternalCommand
         }
     }
 
+    private function createAppDir(string $cwd): void
+    {
+        if (!is_dir($cwd . '/app')) {
+            mkdir($cwd . '/app');
+        }
+    }
+
     private function copyEnvExampleFile(string $cwd): void
     {
         $path = $cwd . '/.env';
 
         if (file_exists($path)) {
-            warning("{$path} already exists, skipped.");
 
-            return;
+            warning("{$path} already exists");
+
+            if (confirm(
+                label: sprintf("Do you want to override %s?", $path),
+                default: false,
+            )) {
+                copy(__DIR__ . '/../../.env.example', $path);
+
+                info("{$path} created");
+                return;
+            }
         }
 
-        if (!confirm(
-            label: sprintf("Do you want to create %s?", $path),
-            default: true,
-        )) {
-            return;
-        }
 
         copy(__DIR__ . '/../../.env.example', $path);
 
@@ -65,16 +77,16 @@ class InternalCommand
         $path = $cwd . '/bandung';
 
         if (file_exists($path)) {
-            warning("{$path} already exists, skipped.");
+            warning("{$path} already exists.");
+            if (confirm(
+                label: sprintf("Do you want to override %s?", $path),
+                default: false,
+            )) {
 
-            return;
-        }
-
-        if (!confirm(
-            label: sprintf("Do you want to create %s?", $path),
-            default: true,
-        )) {
-            return;
+                copy(__DIR__ . '/../../bandung', $path);
+                exec("chmod +x {$path}");
+                return;
+            }
         }
 
         copy(__DIR__ . '/../../bandung', $path);
@@ -88,16 +100,22 @@ class InternalCommand
         $path = $cwd . '/public/index.php';
 
         if (file_exists($path)) {
-            warning("{$path} already exists, skipped.");
+            warning("{$path} already exists.");
+            if (confirm(
+                label: sprintf("Do you want to override %s?", $path),
+                default: false,
+            )) {
 
-            return;
-        }
+                if (!is_dir(dirname($path))) {
+                    mkdir(dirname($path), recursive: true);
+                }
 
-        if (!confirm(
-            label: sprintf("Do you want to create %s?", $path),
-            default: true,
-        )) {
-            return;
+                copy(__DIR__ . '/../../public/index.php', $path);
+
+                info("{$path} created");
+                return;
+            }
+
         }
 
         if (!is_dir(dirname($path))) {
