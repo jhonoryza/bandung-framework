@@ -4,12 +4,9 @@ namespace Fajar\Bandung\Route;
 
 
 use Fajar\Bandung\Attribute\Route;
-use Fajar\Bandung\Container\Container;
-use Fajar\Bandung\Enum\HttpHeader;
 use Fajar\Bandung\Interface\RequestInterface;
 use Fajar\Bandung\Interface\ResponseInterface;
 use Fajar\Bandung\Interface\RouterInterface;
-use Fajar\Bandung\Response\Response;
 
 class Router implements RouterInterface
 {
@@ -29,7 +26,7 @@ class Router implements RouterInterface
     {
         $routes = $this->routes[$request->getMethod()->value] ?? null;
         if ($routes === null) {
-            return Response::make(HttpHeader::HTTP_404, 'page not found');
+            return response()->notFound();
         }
         $matchedRoute = null;
         $params = null;
@@ -43,20 +40,20 @@ class Router implements RouterInterface
         }
 
         if ($params === null) {
-            return Response::make(HttpHeader::HTTP_404, 'page not found');
+            return response()->notFound();
         }
 
         // matched route
         $controllerMethodName = $matchedRoute->reflectionMethod->getName();
         $controllerClassName = $matchedRoute->reflectionMethod->getDeclaringClass()->getName();
-        $controller = Container::instance()->get($controllerClassName);
+        $controller = app()->get($controllerClassName);
 
         // resolve missing params like something injected by dependency injection
         foreach ($matchedRoute->reflectionMethod->getParameters() as $param) {
             $paramName = $param->getName();
             if (!array_key_exists($paramName, $params)) {
                 $paramType = $param->getType()->getName();
-                $params[$paramName] = Container::instance()->get($paramType);
+                $params[$paramName] = app()->get($paramType);
             }
         }
         // call controller method

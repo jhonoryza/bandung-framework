@@ -17,7 +17,7 @@ class Response implements ResponseInterface
     public function __construct(HttpHeader $status, string|null|array|Collection $body = null, array $headers = [])
     {
         $this->status = $status;
-        $this->body = $body ?? '';
+        $this->body = $body;
         $this->headers = array_merge($this->getDefaultHeaders(), $headers);
     }
 
@@ -46,5 +46,12 @@ class Response implements ResponseInterface
     public function getStatusCode(): int
     {
         return $this->status->value;
+    }
+
+    public function notFound(): self
+    {
+        $this->status = HttpHeader::HTTP_404;
+        $this->body = $this->body ?? '404 - not found';
+        return $this;
     }
 }

@@ -44,7 +44,7 @@ class HomeController
     #[Get(uri: '/json')]
     public function json(): ResponseInterface
     {
-        return JsonResponse::make(HttpHeader::HTTP_200, [
+        return jsonResponse([
             'message' => 'ok'
         ]);
     }
