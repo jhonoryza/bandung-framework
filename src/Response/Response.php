@@ -4,25 +4,33 @@ namespace Fajar\Bandung\Response;
 
 use Fajar\Bandung\Enum\HttpHeader;
 use Fajar\Bandung\Interface\ResponseInterface;
+use Illuminate\Support\Collection;
 
 class Response implements ResponseInterface
 {
-    private string $body;
+    protected string|null|array|Collection $body;
 
     private HttpHeader $status;
 
     private array $headers;
 
-    public function __construct(HttpHeader $status, string|null $body = null, array $headers = [])
+    public function __construct(HttpHeader $status, string|null|array|Collection $body = null, array $headers = [])
     {
         $this->status = $status;
         $this->body = $body ?? '';
-        $this->headers = $headers;
+        $this->headers = array_merge($this->getDefaultHeaders(), $headers);
     }
 
-    public static function make(HttpHeader $status, string|null $body = null, array $headers = []): self
+    protected function getDefaultHeaders(): array
     {
-        return new self($status, $body, $headers);
+        return [
+            'Content-Type' => 'text/html; charset=utf-8',
+        ];
+    }
+
+    public static function make(HttpHeader $status, string|null|array|Collection $body = null, array $headers = []): self
+    {
+        return new static($status, $body, $headers);
     }
 
     public function getHeaders(): array
@@ -35,8 +43,8 @@ class Response implements ResponseInterface
         return $this->body;
     }
 
-    public function getStatus(): HttpHeader
+    public function getStatusCode(): int
     {
-        return $this->status;
+        return $this->status->value;
     }
 }

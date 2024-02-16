@@ -20,21 +20,77 @@ class Router implements RouterInterface
 
     public function addRoute(Route $route): self
     {
-        $this->routes[$route->method->value] = $route;
+        $this->routes[$route->method->value][] = $route;
         return $this;
     }
 
     public function dispatch(RequestInterface $request): ResponseInterface
     {
-        $route = $this->routes[$request->getMethod()->value] ?? null;
-        if ($route instanceof Route && $route->uri === $request->getPath()) {
-            // call controller method
-            $controllerMethodName = $route->reflectionMethod->getName();
-            $controllerClassName = $route->reflectionMethod->getDeclaringClass()->getName();
-            $controller = new $controllerClassName();
-            return $controller->{$controllerMethodName}($request);
+        $routes = $this->routes[$request->getMethod()->value] ?? null;
+        if ($routes === null) {
+            return Response::make(HttpHeader::HTTP_404, 'page not found');
         }
-        return Response::make(HttpHeader::HTTP_404, 'not found');
+        $matchedRoute = null;
+        $params = null;
+        /** @var Route $route */
+        foreach ($routes as $route) {
+            $params = $this->resolveParams($route->uri, $request->getPath());
+            if ($params !== null) {
+                $matchedRoute = $route;
+                break;
+            }
+        }
+
+        if ($params === null) {
+            return Response::make(HttpHeader::HTTP_404, 'page not found');
+        }
+
+        // matched route
+        $controllerMethodName = $matchedRoute->reflectionMethod->getName();
+        $controllerClassName = $matchedRoute->reflectionMethod->getDeclaringClass()->getName();
+        $controller = new $controllerClassName();
+
+        // call controller method
+        return $controller->{$controllerMethodName}(...$params);
+    }
+
+    private function resolveParams(string $uri, string $path): ?array
+    {
+        if ($uri === $path) {
+            return [];
+        }
+
+        $result = preg_match_all('/\{\w+}/', $uri, $tokens);
+
+        if (!$result) {
+            return null;
+        }
+
+        $tokens = $tokens[0];
+
+        $matchingRegex = '/^' . str_replace(
+                ['/', ...$tokens],
+                ['\\/', ...array_fill(0, count($tokens), '([\w\d\s]+)')],
+                $uri,
+            ) . '$/';
+
+        $result = preg_match_all($matchingRegex, $path, $matches);
+
+        if ($result === 0) {
+            return null;
+        }
+
+        unset($matches[0]);
+
+        $matches = array_values($matches);
+
+        $valueMap = [];
+
+        foreach ($matches as $i => $match) {
+            $valueMap[trim($tokens[$i], '{}')] = $match[0];
+        }
+
+        return $valueMap;
     }
 
     public function getRoutes(): array

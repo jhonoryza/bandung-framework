@@ -63,13 +63,30 @@ after installation completed there will be several files in your project
 
 in app directory you can create a class lets say `HomeController` and
 
-let's create a function `index`
+let's create a route `/`, `/posts` and `/posts/{id}`
 
 ```php
     #[Get(uri: '/')]
-    public function index(): Response
+    public function index(): ResponseInterface
     {
         return Response::make(HttpHeader::HTTP_200, 'Hello world!');
+    }
+
+    #[Get(uri: '/posts')]
+    public function posts(): ResponseInterface
+    {
+        return JsonResponse::make(HttpHeader::HTTP_200, [
+            'message' => 'ok'
+        ]);
+    }
+
+    #[Get(uri: '/posts/{id}')]
+    public function postDetail(string $id): ResponseInterface
+    {
+        return JsonResponse::make(HttpHeader::HTTP_200, [
+            'message' => 'ok',
+            'id' => $id
+        ]);
     }
 ```
 
