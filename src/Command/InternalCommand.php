@@ -62,6 +62,11 @@ class InternalCommand
         if (!is_dir($cwd . '/app')) {
             mkdir($cwd . '/app');
         }
+        $file = $cwd . '/composer.json';
+        $data = json_decode(file_get_contents($file), true);
+        $data["autoload"]["psr-4"] = array_merge(['App\\' => 'app/'], $data["autoload"]["psr-4"]);
+        file_put_contents($file, json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+        passthru('composer dump-autoload');
     }
 
     private function copyEnvExampleFile(string $cwd): void
@@ -73,14 +78,16 @@ class InternalCommand
             warning("{$path} already exists");
 
             if (confirm(
-                label: sprintf("Do you want to override %s?", $path),
+                label: sprintf("Do you want to override %s ?", $path),
                 default: false,
             )) {
                 copy(__DIR__ . '/../../.env.example', $path);
 
-                info("{$path} created");
+                info("{$path} overrides");
                 return;
             }
+            info("{$path} skipped");
+            return;
         }
 
 
@@ -96,14 +103,17 @@ class InternalCommand
         if (file_exists($path)) {
             warning("{$path} already exists.");
             if (confirm(
-                label: sprintf("Do you want to override %s?", $path),
+                label: sprintf("Do you want to override %s ?", $path),
                 default: false,
             )) {
 
                 copy(__DIR__ . '/../../bandung', $path);
                 exec("chmod +x {$path}");
+                info("{$path} overrides");
                 return;
             }
+            info("{$path} skipped");
+            return;
         }
 
         copy(__DIR__ . '/../../bandung', $path);
@@ -119,7 +129,7 @@ class InternalCommand
         if (file_exists($path)) {
             warning("{$path} already exists.");
             if (confirm(
-                label: sprintf("Do you want to override %s?", $path),
+                label: sprintf("Do you want to override %s ?", $path),
                 default: false,
             )) {
 
@@ -129,10 +139,11 @@ class InternalCommand
 
                 copy(__DIR__ . '/../../public/index.php', $path);
 
-                info("{$path} created");
+                info("{$path} overrides");
                 return;
             }
-
+            info("{$path} skipped");
+            return;
         }
 
         if (!is_dir(dirname($path))) {
