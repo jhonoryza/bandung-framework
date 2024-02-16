@@ -2,9 +2,13 @@
 
 namespace Fajar\Bandung\Kernel;
 
+use Fajar\Bandung\Attribute\Command;
 use Fajar\Bandung\Attribute\Route;
+use Fajar\Bandung\Command\ConsoleCommand;
 use Fajar\Bandung\Container\Container;
 use Fajar\Bandung\Enum\RouteMethod;
+use Fajar\Bandung\Exception\ContainerNotFoundException;
+use Fajar\Bandung\Interface\CommandInterface;
 use Fajar\Bandung\Interface\ContainerInterface;
 use Fajar\Bandung\Interface\RequestInterface;
 use Fajar\Bandung\Interface\RouterInterface;
@@ -12,6 +16,7 @@ use Fajar\Bandung\Request\Request;
 use Fajar\Bandung\Route\Router;
 use ReflectionAttribute;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
 
 /**
@@ -20,10 +25,13 @@ use ReflectionMethod;
  */
 class Kernel
 {
+    private string $appNamespace = 'App\\';
+
     /**
      * this function will do the binding of all dependency
+     * @throws ContainerNotFoundException
      */
-    public function registerProviders(string $appDir): Container
+    public function registerHttpDependency(string $appDir): Container
     {
         $container = new Container();
 
@@ -46,44 +54,47 @@ class Kernel
         return $container;
     }
 
+    public function registerCommandDependency(string $appDir): Container
+    {
+        $container = new Container();
+
+        Container::setInstance($container);
+
+        $container
+            ->singleton(Kernel::class, fn() => $this)
+            ->singleton(ContainerInterface::class, fn() => $container)
+            ->singleton(CommandInterface::class, fn() => new ConsoleCommand());
+
+        $this->discoverCommand($container, $appDir);
+
+        return $container;
+    }
+
     /**
      * this function will register all routes from app folders
      * checking all php class that has Route attribute
      * then register it to Router class
+     * @throws ContainerNotFoundException
      */
-    public function discoverRoutes(Container $container, string $directory): void
+    private function discoverRoutes(Container $container, string $directory): void
     {
-        $namespace = 'App\\';
-
         $directories = new \RecursiveDirectoryIterator($directory);
         $files = new \RecursiveIteratorIterator($directories);
         foreach ($files as $file) {
-            $fileName = $file->getFilename();
-            if (
-                $fileName === ''
-                || $fileName === '.'
-                || $fileName === '..'
-                || ucfirst($fileName) !== $fileName
-            ) {
-                continue;
-            }
 
-            $className = str_replace(
-                [$directory, '/', '.php', '\\\\'],
-                [$namespace, '\\', '', '\\'],
-                $file->getPathname(),
-            );
-            if (!class_exists($className)) {
-                continue;
-            }
-            $class = new ReflectionClass($className);
+            $fileName = $this->resolveFilename($file);
+            if ($fileName === null) continue;
+
+            $class = $this->resolveClass($directory, $file);
+            if ($class === null) continue;
 
             foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
                 if (is_string($method)) {
-                    if (!class_exists($method)) {
+                    try {
+                        $method = new ReflectionClass($method);
+                    } catch (ReflectionException) {
                         continue;
                     }
-                    $method = new ReflectionClass($method);
                 }
                 $routeAttribute = $method->getAttributes(Route::class, ReflectionAttribute::IS_INSTANCEOF)[0] ?? null;
                 $route = $routeAttribute?->newInstance();
@@ -94,6 +105,71 @@ class Kernel
                 }
             }
         }
+    }
 
+    /**
+     * this function will register all command from app folders
+     * checking all php class that has Command attribute
+     * then register it to Console class
+     * @throws ContainerNotFoundException
+     */
+    private function discoverCommand(Container $container, string $directory): void
+    {
+        $directories = new \RecursiveDirectoryIterator($directory);
+        $files = new \RecursiveIteratorIterator($directories);
+        foreach ($files as $file) {
+
+            $fileName = $this->resolveFilename($file);
+            if ($fileName === null) continue;
+
+            $class = $this->resolveClass($directory, $file);
+            if ($class === null) continue;
+
+            foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+                if (is_string($method)) {
+                    try {
+                        $method = new ReflectionClass($method);
+                    } catch (ReflectionException) {
+                        continue;
+                    }
+                }
+                $commandAttribute = $method->getAttributes(Command::class, ReflectionAttribute::IS_INSTANCEOF)[0] ?? null;
+                $command = $commandAttribute?->newInstance();
+
+                if ($command instanceof Command) {
+                    $command->setReflectionMethod($method);
+                    $container->get(CommandInterface::class)->addCommand($command);
+                }
+            }
+        }
+    }
+
+    private function resolveFilename($file): string|null
+    {
+        $fileName = $file->getFilename();
+        if (
+            $fileName === ''
+            || $fileName === '.'
+            || $fileName === '..'
+            || ucfirst($fileName) !== $fileName
+        ) {
+            return null;
+        }
+        return $fileName;
+    }
+
+    private function resolveClass(string $directory, $file): ReflectionClass|null
+    {
+        $className = str_replace(
+            [$directory, '/', '.php', '\\\\'],
+            [$this->appNamespace, '\\', '', '\\'],
+            $file->getPathname(),
+        );
+        try {
+            $class = new ReflectionClass($className);
+        } catch (ReflectionException) {
+            return null;
+        }
+        return $class;
     }
 }

@@ -3,6 +3,7 @@
 namespace Fajar\Bandung\Container;
 
 use Exception;
+use Fajar\Bandung\Exception\ContainerNotFoundException;
 use Fajar\Bandung\Interface\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -23,7 +24,7 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @throws Exception
+     * @throws ContainerNotFoundException
      */
     public function get(string $className): object
     {
@@ -34,7 +35,7 @@ class Container implements ContainerInterface
         try {
             return $this->resolve($className); // the tree dots will convert to closure
         } catch (Throwable $throwable) {
-            throw new Exception($throwable->getMessage());
+            throw new ContainerNotFoundException('Target class [' . $className . '] does not exist.', 0, $throwable);
         }
     }
 
