@@ -14,7 +14,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 $appDir = __DIR__ . '/app';
 $container = (new Kernel())->registerCommandDependency($appDir);
 
-$app = new CommandKernel($container);
+$app = new CommandKernel($container, $_SERVER['argv']);
 $app->run();
 
 exit;
