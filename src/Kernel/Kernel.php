@@ -20,13 +20,19 @@ use ReflectionException;
 use ReflectionMethod;
 
 /**
- * this class responsible to register all dependency
- * and register all route
+ * this class responsible to register http request dependency
+ * or console command dependency
  */
 class Kernel
 {
+    /*
+     * default app namespace
+     */
     private string $appNamespace = 'App\\';
 
+    /**
+     * this function will load environment variable
+     */
     public function loadEnv($path): self
     {
         if (!file_exists($path . '/.env')) {
@@ -46,8 +52,7 @@ class Kernel
     }
 
     /**
-     * this function will do the binding of all dependency
-     * @throws ContainerNotFoundException
+     * this function will do the binding all http request dependency
      */
     public function registerHttpDependency(string $appDir): Container
     {
@@ -72,6 +77,9 @@ class Kernel
         return $container;
     }
 
+    /**
+     * this function will do the binding all console command dependency
+     */
     public function registerCommandDependency(string $appDir): Container
     {
         $container = new Container();
@@ -94,10 +102,9 @@ class Kernel
     }
 
     /**
-     * this function will register all routes from app folders
+     * this function will register all routes from $directory variable
      * checking all php class that has Route attribute
      * then register it to Router class
-     * @throws ContainerNotFoundException
      */
     private function discoverRoutes(Container $container, string $directory): void
     {
@@ -129,21 +136,24 @@ class Kernel
 
                 if ($route instanceof Route) {
                     $route->setReflectionMethod($method);
-                    $container->get(RouterInterface::class)->addRoute($route);
+                    try {
+                        $container->get(RouterInterface::class)->addRoute($route);
+                    } catch (ContainerNotFoundException) {
+                        continue;
+                    }
                 }
             }
         }
     }
 
     /**
-     * this function will register all command from app folders
+     * this function will register all command from $directory variable
      * checking all php class that has Command attribute
-     * then register it to Console class
-     * @throws ContainerNotFoundException
+     * then register it to ConsoleCommand class
      */
     private function discoverCommand(Container $container, string $directory): void
     {
-        // check if directory is exists
+        // check if directory is existing
         if (!is_dir($directory)) {
             return;
         }
@@ -171,7 +181,11 @@ class Kernel
 
                 if ($command instanceof Command) {
                     $command->setReflectionMethod($method);
-                    $container->get(CommandInterface::class)->addCommand($command);
+                    try {
+                        $container->get(CommandInterface::class)->addCommand($command);
+                    } catch (ContainerNotFoundException) {
+                        continue;
+                    }
                 }
             }
         }

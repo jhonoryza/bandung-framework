@@ -3,6 +3,7 @@
 namespace Fajar\Bandung\Kernel;
 
 use Fajar\Bandung\Attribute\Command;
+use Fajar\Bandung\Command\ConsoleCommand;
 use Fajar\Bandung\Interface\CommandInterface;
 use Fajar\Bandung\Interface\ContainerInterface;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -11,6 +12,9 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\intro;
 use function Laravel\Prompts\warning;
 
+/**
+ * this class responsible to handle console command input argument
+ */
 class CommandKernel
 {
     private ContainerInterface $container;
@@ -23,16 +27,17 @@ class CommandKernel
     }
 
     /**
-     * this function handle request and response
+     * this function will be called from bandung file
      */
     public function run(): void
     {
-        $commands = $this->container
-            ->get(CommandInterface::class)
-            ->getCommands();
+        /** @var ConsoleCommand $command */
+        $consoleCommand = $this->container->get(CommandInterface::class);
+        $commands = $consoleCommand->getCommands();
 
         intro('bandung framework');
 
+        // render all available command if no argument given
         if ($this->input->getFirstArgument() === null) {
             $listCommand = collect($commands)->keys()->join(PHP_EOL);
             warning('List available commands: ');
@@ -42,6 +47,7 @@ class CommandKernel
 
         info('running php bandung ' . $this->input->getFirstArgument());
 
+        // check if command exist or registered
         /** @var Command|null $command */
         $command = $commands[$this->input->getFirstArgument()] ?? null;
         if ($command === null) {
@@ -49,6 +55,7 @@ class CommandKernel
             return;
         }
 
+        // run command
         $methodName = $command->getReflectionMethod()->getName();
         $class = $command->getReflectionMethod()->getDeclaringClass()->getName();
         $controller = new $class();

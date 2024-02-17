@@ -16,6 +16,9 @@ class Container implements ContainerInterface
     public array $singletons = [];
     private static self $instance;
 
+    /*
+     * this function is used to register bind
+     */
     public function register(string $className, callable $callback): self
     {
         $this->binds[$className] = $callback;
@@ -24,6 +27,7 @@ class Container implements ContainerInterface
     }
 
     /**
+     * this function is used to resolved singleton or bind from the container
      * @throws ContainerNotFoundException
      */
     public function get(string $className): object
@@ -40,6 +44,7 @@ class Container implements ContainerInterface
     }
 
     /**
+     * this function is used to resolved class from the container
      * @throws Exception|ReflectionException
      */
     private function resolve(string $className): object
@@ -62,6 +67,9 @@ class Container implements ContainerInterface
         return $reflector->newInstance(...$parameters);
     }
 
+    /*
+     * this function is used to register singleton
+     */
     public function singleton(string $className, callable $callback): self
     {
         $this->binds[$className] = function () use ($callback, $className) {

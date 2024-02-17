@@ -7,8 +7,17 @@ use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\warning;
 
+/**
+ * this class is used for internal purpose
+ * to serve webserver
+ * and install bandung framework
+ */
 class InternalCommand
 {
+    /**
+     * php bandung serve
+     * you can customize host and port from .env APP_URL
+     */
     #[Command('serve')]
     public function serve(): void
     {
@@ -17,6 +26,11 @@ class InternalCommand
         passthru("php -S {$host} -t public/");
     }
 
+    /**
+     * php bandung install
+     * this function will copy all required files
+     * to run bandung framework
+     */
     #[Command('install')]
     public function install(): void
     {

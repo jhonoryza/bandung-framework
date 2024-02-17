@@ -8,8 +8,9 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 /**
  * console command flow
- * first we register kernel to binding all dependency and command from app folder
- * then we create command kernel to handle request and response
+ * first we load environment variable
+ * then we register kernel to binding all console command dependency from app directory
+ * then we create command kernel to run console command
  */
 
 $appDir = __DIR__ . '/app';

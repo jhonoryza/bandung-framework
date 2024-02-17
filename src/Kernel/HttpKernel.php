@@ -7,6 +7,9 @@ use Fajar\Bandung\Interface\RequestInterface;
 use Fajar\Bandung\Interface\ResponseInterface;
 use Fajar\Bandung\Interface\RouterInterface;
 
+/**
+ * this class is to handle http request and response
+ */
 class HttpKernel
 {
     private ContainerInterface $container;
@@ -17,7 +20,7 @@ class HttpKernel
     }
 
     /**
-     * this function handle request and response
+     * this function will be called from public/index.php
      */
     public function run(): void
     {

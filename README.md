@@ -34,6 +34,10 @@ small php framework
 - query builder
 - migration
 - queue
+- filesystem
+- mail
+- notification
+- event and listener
 
 ## Getting Started
 

@@ -9,6 +9,10 @@ use Fajar\Bandung\Interface\ResponseInterface;
 use Fajar\Bandung\Response\JsonResponse;
 use Fajar\Bandung\Response\Response;
 
+/**
+ * playground controller
+ * this controller is used for testing purpose
+ */
 class HomeController
 {
     #[Get(uri: '/')]

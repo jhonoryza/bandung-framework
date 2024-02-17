@@ -5,6 +5,9 @@ namespace Fajar\Bandung\Command;
 use Fajar\Bandung\Attribute\Command;
 use Fajar\Bandung\Interface\CommandInterface;
 
+/**
+ * this class is used for register commands
+ */
 class ConsoleCommand implements CommandInterface
 {
     public array $commands = [];
