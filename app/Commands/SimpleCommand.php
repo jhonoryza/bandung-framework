@@ -6,7 +6,7 @@ use Fajar\Bandung\Attribute\Command;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\warning;
 
-class TestCommand
+class SimpleCommand
 {
     #[Command('test:warning')]
     public function testWarning(): void

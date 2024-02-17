@@ -9,7 +9,7 @@ class ContainerTest extends TestCase
 {
 
     /** @test */
-    public function container_is_worked()
+    public function container_is_just_worked()
     {
         $container = new Container();
 
@@ -19,7 +19,7 @@ class ContainerTest extends TestCase
     }
 
     /** @test */
-    public function container_can_auto_resolved()
+    public function container_can_auto_resolved_without_registered()
     {
         $container = new Container();
 
